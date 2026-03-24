@@ -1,0 +1,9 @@
+{
+  "name": "bella-language-tutor-proxy",
+  "version": "1.0.0",
+  "description": "Anthropic API proxy for Bella Language Tutor — free ESL app for immigrants and refugees",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  }
+}
