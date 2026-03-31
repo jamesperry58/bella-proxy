@@ -458,7 +458,12 @@ function updateLevel(l) {
   }
 }
 
-document.getElementById('langSelect2').onchange = function(e) { state.lang = e.target.value; };
+document.getElementById('langSelect2').onchange = function(e) {
+  state.lang = e.target.value;
+  state.msgs = []; state.msgCount = 0; state.rpMode = false;
+  document.getElementById('chatArea').innerHTML = '';
+  sendWelcome();
+};
 document.getElementById('targetLangSelect2').onchange = function(e) {
   state.targetLang = e.target.value;
   state.msgs = []; state.msgCount = 0; state.rpMode = false;
@@ -612,7 +617,12 @@ function appendMsg(role, html, extra) {
     '<button class="mute-btn" id="' + muteId + '" onclick="stopTTS()">⏹ Stop</button>' +
     '<button class="copy-btn" onclick="copyText(\'' + msgId + '\',this)">Copy</button>' +
     '</div>';
-  chat.appendChild(d); chat.scrollTop = chat.scrollHeight; return d;
+  chat.appendChild(d);
+  // Scroll so the TOP of the new message is visible
+  setTimeout(function() {
+    d.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 50);
+  return d;
 }
 function showTyping() {
   var c = document.getElementById('chatArea');
