@@ -539,7 +539,7 @@ function speakInline(text, langKey, btnEl, muteEl) {
 function speakModal(mode) {
   stopTTS();
   var word = state.currentWord; if (!word) return;
-  var lang = getSpeechLang(getTargetLang());
+  var lang = getSpeechLang(getWordLang(state.currentWord || ''));
   var ps = document.getElementById('pronStopBtn');
   if (ps) ps.classList.add('visible');
   function done() { if (ps) ps.classList.remove('visible'); }
@@ -679,7 +679,7 @@ function renderWordBank(words) {
       '<div style="display:flex;justify-content:space-between;align-items:flex-start">' +
       '<span class="word-en">' + w.en + '</span>' +
       '<span style="display:flex;gap:2px">' +
-      '<button class="speak-btn" id="wbs' + i + '" onclick="event.stopPropagation();speakInline(\'' + esc(w.en) + '\',\'' + esc(getTargetLang()) + '\',this,document.getElementById(\'wbm' + i + '\'))" title="Hear">🔊</button>' +
+      '<button class="speak-btn" id="wbs' + i + '" onclick="event.stopPropagation();speakInline(\'' + esc(w.en) + '\',\'' + esc(getWordLang(w.en)) + '\',this,document.getElementById(\'wbm' + i + '\'))" title="Hear">🔊</button>' +
       '<button class="mute-btn" id="wbm' + i + '" onclick="event.stopPropagation();stopTTS()">⏹</button>' +
       '</span></div>' +
       '<span class="word-tr">' + (w.tr||'') + '</span>' +
@@ -687,12 +687,22 @@ function renderWordBank(words) {
   }).join('');
   document.getElementById('wordTotal').textContent = state.wordBank.length;
 }
+function getWordLang(word) {
+  if (!word) return getTargetLang();
+  if (/[؀-ۿݐ-ݿﭐ-﷿ﹰ-﻿]/.test(word)) return state.lang === 'Farsi' ? 'Farsi' : 'Arabic';
+  if (/[一-鿿㐀-䶿]/.test(word)) return 'Mandarin';
+  if (/[぀-ヿ]/.test(word)) return 'Japanese';
+  if (/[가-힯]/.test(word)) return 'Korean';
+  if (/[ऀ-ॿ]/.test(word)) return 'Hindi';
+  if (/[Ѐ-ӿ]/.test(word)) return 'Russian';
+  return getTargetLang();
+}
 function renderPronPanel(words) {
   if (!words || !words.length) return;
   document.getElementById('pronPanel').innerHTML = '<div style="font-size:10px;color:var(--gray);margin-bottom:5px">Tap 🔊 or word to practice:</div>' +
     words.slice(0,5).map(function(w, i) {
       return '<div style="display:flex;align-items:center;gap:5px;padding:4px 0;border-bottom:1px solid #f1f5f9">' +
-        '<button class="speak-btn" id="pps' + i + '" onclick="speakInline(\'' + esc(w.en) + '\',\'' + esc(getTargetLang()) + '\',this,document.getElementById(\'ppm' + i + '\'))" title="Hear">🔊</button>' +
+        '<button class="speak-btn" id="pps' + i + '" onclick="speakInline(\'' + esc(w.en) + '\',\'' + esc(getWordLang(w.en)) + '\',this,document.getElementById(\'ppm' + i + '\'))" title="Hear">🔊</button>' +
         '<button class="mute-btn" id="ppm' + i + '" onclick="stopTTS()">⏹</button>' +
         '<span style="font-weight:600;font-size:12px;flex:1;cursor:pointer" onclick="openPron(\'' + esc(w.en) + '\',\'' + esc(w.ipa||'') + '\',\'' + esc(w.tip||'') + '\')">' + w.en + '</span>' +
         '<span style="font-size:10px;color:#6366f1">' + (w.ipa ? '/'+w.ipa+'/' : '') + '</span></div>';
@@ -739,7 +749,7 @@ function renderFC() {
 }
 function flipCard() { var c = document.getElementById('fcCard'); c.classList.toggle('fc-flipped'); var h = document.getElementById('fcHint'); if (h) h.style.display='none'; }
 function fcNext(k) { if (k) state.fc.known++; state.fc.idx++; renderFC(); }
-function fcSpeak(e, w) { e.stopPropagation(); var u = new SpeechSynthesisUtterance(w); u.lang = getSpeechLang(getTargetLang()); u.rate = state.ttsRate; u.volume = state.ttsVolume; window.speechSynthesis.speak(u); }
+function fcSpeak(e, w) { e.stopPropagation(); var u = new SpeechSynthesisUtterance(w); u.lang = getSpeechLang(getWordLang(w)); u.rate = state.ttsRate; u.volume = state.ttsVolume; window.speechSynthesis.speak(u); }
 
 // ── Quiz ──
 function startQuiz() {
